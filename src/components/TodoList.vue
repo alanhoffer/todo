@@ -69,7 +69,7 @@
          <p class="todo-tasks-select-filter-option" :class="{active:( this.statusFilter == 'all' ? true : false)}" @click="() => { this.statusFilter = 'all' }">All</p> 
          <p class="todo-tasks-select-filter-option" :class="{active:( this.statusFilter == 'completed' ? true : false)}" @click="() => { this.statusFilter = 'completed' }">Completed</p> 
       </div>
-      <div v-if="this.taskListData.find(task => task.status != 'completed')"  class="todo-tasks-list">
+      <div v-if="this.taskListData.length >= 1"  class="todo-tasks-list">
         
         <div class="todo-tasks-list-card"  v-for="task in this.searchFilter()" v-bind:key="task.id" v-show="task.projectid == this.projectSelected"  >     
           <div class="todo-tasks-list-card-done">   
@@ -92,7 +92,7 @@
 
 
       </div>
-      <div v-if="!this.taskListData.find(task => task.status != 'completed')" class="todo-tasks-listempty"  >
+      <div v-if="this.taskListData.length < 1" class="todo-tasks-listempty"  >
           <p v-show="!isLoading">No hay ninguna tarea</p>
           <span v-show="isLoading"></span>
       </div>
@@ -221,7 +221,6 @@ export default {
     setProjectId(id){
       this.taskAddData.projectid = id;
       this.projectSelected = id;
-      console.log(this.projectSelected);
     },
     toggleAddProjectActive(){
       this.projectAddData.name = '';
@@ -280,7 +279,9 @@ export default {
       body: JSON.stringify({status:'completed'})
       }).then(res => {
         if(res.status == 200){
-          this.taskAddData[id].status = 'completed';
+          console.log(this.taskListData);
+          this.taskListData.map(task => task.id == id ? task.status = 'completed': 'waiting');
+          console.log(this.taskListData);
         }
       });
     },
@@ -305,9 +306,8 @@ export default {
             'Content-Type': 'application/json'
           },
         body: JSON.stringify(this.taskAddData)
-        }).then(res => {
+        }).then(() => {
           
-          console.log(res);      
           fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/tasks')
           .then(res => res.json())
           .then(response => {
@@ -327,9 +327,8 @@ export default {
             'Content-Type': 'application/json'
           },
         body: JSON.stringify(this.projectAddData)
-        }).then(res => {
-          
-          console.log(res);      
+        }).then(() => {
+             
           fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/proyectos')
           .then(res => res.json())
           .then(response => {
@@ -752,7 +751,7 @@ export default {
   justify-content: center;
 }
 
-.todo-add-projectinput input{
+.todo-add-projectinput-container input{
   width: 80%;
   height: 40px;
   border-radius: 1rem;
@@ -764,18 +763,19 @@ export default {
   outline: none;
 }
 
-.todo-add-projectinput svg{
+.todo-add-projectinput-container svg{
   width: 40px;
   height: 40px;
   margin:0rem 0.2rem;
   padding: 0.5rem;
   border-radius: 1rem;
   box-sizing: border-box;
+  color: var(--color-blue);
   background-color: var(--color-blue-light);
 }
 
 
-.todo-add-projectinput svg:hover{
+.todo-add-projectinput-container svg:hover{
   color:var(--color-blue);
   background-color: var(--color-white);
   cursor: pointer;
@@ -783,7 +783,7 @@ export default {
 
 
 
-.todo-add-projectinput .delete-project svg:hover{
+.todo-add-projectinput-container .delete-project svg:hover{
   color:var(--color-blue);
 }
 
