@@ -65,9 +65,13 @@
     </div>
     <div class="todo-tasks">
       <h2 class="todo-tasks-title"> MY TASKS </h2>
-      <div v-if="this.taskListData.find(task => task.status != 'done')"  class="todo-tasks-list">
+      <div class="todo-tasks-select-filter">
+         <p class="todo-tasks-select-filter-option" :class="{active:( this.statusFilter == 'all' ? true : false)}" @click="() => { this.statusFilter = 'all' }">All</p> 
+         <p class="todo-tasks-select-filter-option" :class="{active:( this.statusFilter == 'completed' ? true : false)}" @click="() => { this.statusFilter = 'completed' }">Completed</p> 
+      </div>
+      <div v-if="this.taskListData.find(task => task.status != 'completed')"  class="todo-tasks-list">
         
-        <div class="todo-tasks-list-card"  v-for="task in this.searchFilter()" v-bind:key="task.id" v-show="task.status != 'done' && task.projectid == this.projectSelected"  >     
+        <div class="todo-tasks-list-card"  v-for="task in this.searchFilter()" v-bind:key="task.id" v-show="task.projectid == this.projectSelected"  >     
           <div class="todo-tasks-list-card-done">   
             <svg @click="toggleCompleted(task.id)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
@@ -88,7 +92,7 @@
 
 
       </div>
-      <div v-if="!this.taskListData.find(task => task.status != 'done')" class="todo-tasks-listempty"  >
+      <div v-if="!this.taskListData.find(task => task.status != 'completed')" class="todo-tasks-listempty"  >
           <p v-show="!isLoading">No hay ninguna tarea</p>
           <span v-show="isLoading"></span>
       </div>
@@ -134,6 +138,7 @@ export default {
           projectsListData: [],
           isLoading:true,
           addActive:false,
+          statusFilter: 'all',
           addProjectActive:false,
           errorCaptured:false,
           searchText: '',
@@ -171,7 +176,12 @@ export default {
   methods:{
     
     searchFilter(){
-      return this.taskListData.filter( task => task.title.toLowerCase().startsWith(this.searchText.toLowerCase()));
+      if(this.statusFilter == 'all'){
+        return this.taskListData.filter( task => task.title.toLowerCase().startsWith(this.searchText.toLowerCase()) && task.status != 'completed');
+      }
+      if (this.statusFilter == 'completed'){
+        return this.taskListData.filter( task => task.title.toLowerCase().startsWith(this.searchText.toLowerCase()) && task.status == 'completed');
+      }
     },
     simpleProjectName(name){
       let nameSliced = name.split(" ").map(word => word.slice(0,1));
@@ -231,27 +241,43 @@ export default {
     },
 
     projectDelete(id){
+
       fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/proyectos/' + id,{
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         }
       }).then(res => {
+        let taskToDelete = this.taskListData.filter( task => task.projectid == id);
+        taskToDelete.map(task => {
+          fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/tasks/' + task.id,{
+              method: 'DELETE',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            }).then(res => {
+              if(res.status == 200){
+                this.taskListData = this.taskListData.filter( task => task.projectid != id);
+              }
+          });
+        })
+
         if(res.status == 200){
-          this.showError("Project deleted successfully")
+          this.projectSelected = null;
+          this.showError("Project deleted successfully");
           this.projectsListData = this.projectsListData.filter(project => project.id != id);
         }
       });
     },
     
-    
+
     toggleCompleted(id){
       fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/tasks/' + id,{
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-      body: JSON.stringify({status:'done'})
+      body: JSON.stringify({status:'completed'})
       }).then(res => {
         if(res.status == 200){
           this.taskListData = this.taskListData.filter(task => task.id != id);
@@ -282,7 +308,7 @@ export default {
         }).then(res => {
           
           console.log(res);      
-          fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/tasks?status=waiting')
+          fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/tasks')
           .then(res => res.json())
           .then(response => {
                   this.taskListData = response;
@@ -595,7 +621,23 @@ export default {
 }
 .todo-tasks-title{
 }
-
+.todo-tasks-select-filter{
+  display:flex;
+  justify-content: center;
+}
+.todo-tasks-select-filter-option{
+  cursor: pointer;
+  margin:0rem 0.5rem;
+  padding:0.25rem 1rem;
+  border-radius: 1rem;
+  color:var(--color-blue);
+  background-color: var(--color-grey-light);
+}
+.todo-tasks-select-filter-option.active{
+  color:var(--color-white);
+  background-color: var(--color-blue);
+  
+}
 .todo-tasks-list{
   display:flex;
   height: 80%;
