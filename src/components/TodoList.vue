@@ -280,7 +280,7 @@ export default {
       body: JSON.stringify({status:'completed'})
       }).then(res => {
         if(res.status == 200){
-          this.taskListData = this.taskListData.filter(task => task.id != id);
+          this.taskAddData[id].status = 'completed';
         }
       });
     },
