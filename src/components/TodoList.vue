@@ -686,9 +686,10 @@ export default {
 .todo-tasks-list-card{
   width: 80%;
   display:flex;
+  justify-content: space-between;
   align-items: center;
   border-radius: 1rem;
-  margin: 1rem;
+  margin: 1rem 0rem;
 }
 
 
@@ -702,6 +703,7 @@ export default {
   color:var(--color-green);
   cursor: pointer;
 }
+
 
 .todo-tasks-list-card-delete svg{
   height:1.5rem;
@@ -722,7 +724,6 @@ export default {
 .todo-tasks-list-card-text{
   width: 80%;
   box-sizing: border-box;
-  margin:0rem 2rem;
   text-align: left;
   overflow-wrap: break-word;
   color:black;
