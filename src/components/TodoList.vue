@@ -69,7 +69,7 @@
          <p class="todo-tasks-select-filter-option" :class="{active:( this.statusFilter == 'all' ? true : false)}" @click="() => { this.statusFilter = 'all' }">All</p> 
          <p class="todo-tasks-select-filter-option" :class="{active:( this.statusFilter == 'completed' ? true : false)}" @click="() => { this.statusFilter = 'completed' }">Completed</p> 
       </div>
-      <div v-if="this.taskListData.length >= 1"  class="todo-tasks-list">
+      <div v-if="!emptyCheck()"  class="todo-tasks-list">
         
         <div class="todo-tasks-list-card"  v-for="task in this.searchFilter()" v-bind:key="task.id" v-show="task.projectid == this.projectSelected"  >     
           <div class="todo-tasks-list-card-done">   
@@ -92,8 +92,8 @@
 
 
       </div>
-      <div v-if="this.taskListData.length < 1" class="todo-tasks-listempty"  >
-          <p v-show="!isLoading">No hay ninguna tarea</p>
+      <div v-if="emptyCheck()" class="todo-tasks-listempty"  >
+          <p v-show="!isLoading">{{ this.emptyMessage }}</p>
           <span v-show="isLoading"></span>
       </div>
     </div>
@@ -139,6 +139,7 @@ export default {
           isLoading:true,
           addActive:false,
           statusFilter: 'all',
+          emptyMessage:'No hay ninguna tarea',
           addProjectActive:false,
           errorCaptured:false,
           searchText: '',
@@ -200,6 +201,28 @@ export default {
           this.errorCaptured = false;
           this.errorMessage = '';
         }, 3000)
+    },
+    emptyCheck(){
+      let result;
+      
+      if(this.projectsListData.length < 1){
+        console.log(this.projectsListData.length)
+        this.emptyMessage = 'No hay ningun proyecto';
+        return true
+      }
+      else{
+        if(this.statusFilter == 'all'){
+          result = this.taskListData.filter(task => task.status != 'completed');
+          this.emptyMessage = 'No hay ninguna tarea';
+          console.log(result.length < 1 ?  true : false)
+          return result.length < 1 ?  true : false
+        }
+        if(this.statusFilter == 'completed'){
+          result = this.taskListData.filter(task => task.status == 'completed');
+          this.emptyMessage = 'No hay ninguna tarea completada';
+          return result.length < 1 ?  true: false
+        }
+      }
     },
     closeAddTaskActive(){
       this.taskAddData.title = "";
