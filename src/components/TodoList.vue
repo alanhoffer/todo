@@ -837,6 +837,119 @@ export default {
     -moz-text-fill-color: transparent;
 }
 
+@media screen and (max-width: 750px) {
+  .todo{
+    flex-direction: column;
+  }
+  .todo-add{    
+    width: 80%;
+  }
+  .todo-tasks{
+  width:calc(100% - 1rem);
+  height: 100%
+  }
+  .todo-search{
+      width: calc(100% - 1rem);
+      height: 100%;
+  }
+
+  .todo-search .container .projects-list{
+  grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+  grid-template-rows: repeat(auto-fill, 1fr);
+  gap: 1rem;
+  max-height: 300px;
+  flex-direction: row;
+}
+
+.todo-search .container .projects .project-item span{
+  width: 50px;
+  height: 50px;
+}
+.todo-search .container .projects .project-item .delete-project{
+  position:absolute;
+  top:0px;
+  right:0px;
+}
+
+
+.copyright{
+    bottom:auto;
+}
+
+
+.copyright h1{
+  background-image:   linear-gradient( 
+      white 0%,
+      white 50%,
+      white 50%,
+      white 100%
+    );
+}
+  
+}
+
+
+@media screen and (max-width: 480px) {
+
+
+  .copyright{
+    bottom:auto;
+  }
+
+
+  .copyright h1{
+    background-image:   linear-gradient( 
+        white 0%,
+        white 50%,
+        white 50%,
+        white 100%
+      );
+  }
+
+
+  .todo-add{    
+    width: 80%;
+  }
+
+  .todo-add-form input{
+    height: 25px;
+  }
+
+  .todo-add-form textarea{
+    min-height: 150px;
+  }
+
+  .todo-add-form button{
+    height: 25px;
+  }
+
+
+  .todo-search .container .welcome input{
+  width: 100%;
+  padding:10px;
+  border-radius: 1rem;
+  }
+  .todo-search .container .projects-list{
+  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  grid-template-rows: repeat(auto-fill, 1fr);
+  gap: 1rem;
+  max-height: 300px;
+  flex-direction: row;
+  }
+
+  .todo-search .container .projects .project-item span{
+  width: 30px;
+  height: 30px;
+  }
+
+  .todo-search .container .projects .project-item .delete-project{
+    position:absolute;
+    top:0px;
+    right:0px;
+  }
+
+}
+
 
 @keyframes spawn {
   0% { transform: translateY(0rem); }

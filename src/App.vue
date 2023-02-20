@@ -50,6 +50,19 @@ input::placeholder{
   color:var(--color-grey-dark);
 }
 
+@media screen and (max-width: 768px) {
+
+html {
+  font-size: 14px;
+}
+}
+
+@media screen and (max-width: 480px) {
+
+html {
+  font-size: 10px;
+}
+}
 
 /* width */
 ::-webkit-scrollbar {
