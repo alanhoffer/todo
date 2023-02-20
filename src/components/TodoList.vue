@@ -755,7 +755,7 @@ export default {
   width: 80%;
   height: 40px;
   border-radius: 1rem;
-  color:var(--color-white);
+  color:var(--color-grey-dark);
   background-color: var(--color-blue-light);
   border: none;
   padding-left:1rem;
