@@ -3,9 +3,10 @@
     <div class="todo-search" >
       <div class="container">
         <div class="welcome">
-          <h1 class="title"> HELLO WORLD! </h1>
-          <p class="subtitle">Welcome back to the workspace!</p>
-          <input v-model="searchText" placeholder="Search Task here.." />
+          <h1 class="title"> {{ titleGenerator() }} </h1>
+          <p class="subtitle">{{ subTitleGenerator() }}</p>
+
+          <input v-if="this.projectSelected !=null" v-model="searchText" placeholder="Search Task here.." />
         </div>
         <div class="projects">
             <div class="title">
@@ -63,7 +64,7 @@
 
       </div>
     </div>
-    <div class="todo-tasks">
+    <div v-if="this.projectSelected !=null" class="todo-tasks">
       <h2 class="todo-tasks-title"> MY TASKS </h2>
       <div class="todo-tasks-select-filter">
          <p class="todo-tasks-select-filter-option" :class="{active:( this.statusFilter == 'all' ? true : false)}" @click="() => { this.statusFilter = 'all' }">All</p> 
@@ -73,13 +74,18 @@
         
         <div class="todo-tasks-list-card"  v-for="task in this.searchFilter()" v-bind:key="task.id" v-show="task.projectid == this.projectSelected"  >     
           <div class="todo-tasks-list-card-done">   
-            <svg v-if="task.status != 'completed'" @click="toggleCompleted(task.id)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <svg :class="{active: task.status == 'completed'}" @click="toggleCompleted(task.id)" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
             </svg>
           </div>  
           <div class="todo-tasks-list-card-text">
             <h2>{{ task.title }}</h2>
             <p>{{ task.text }}</p>
+          </div>
+          <div v-if="this.statusFilter == 'completed'" class="todo-tasks-list-card-delete" @click="taskSetUncompleted(task.id)">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
           </div>
           <div class="todo-tasks-list-card-delete" @click="taskDelete(task.id)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
@@ -97,7 +103,7 @@
           <span v-show="isLoading"></span>
       </div>
     </div>
-    <div class="todo-add-togglebutton" @click.stop="toggleAddActive">
+    <div v-if="this.projectSelected !=null" class="todo-add-togglebutton" @click.stop="toggleAddActive">
       <svg v-show="!this.addActive" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
       </svg>
@@ -184,6 +190,26 @@ export default {
         return this.taskListData.filter( task => task.title.toLowerCase().startsWith(this.searchText.toLowerCase()) && task.status == 'completed');
       }
     },
+    titleGenerator(){
+      if(this.projectsListData.length < 1){
+        return 'CREATE PROJECT'
+        
+      }
+      if(this.projectSelected == null){
+        return 'SELECT PROJECT'
+      }
+      return 'HELLO WORLD'
+    },
+    subTitleGenerator(){
+      if(this.projectsListData.length < 1){
+        return 'Start creating your first project now!'
+        
+      }
+      if(this.projectSelected == null){
+        return 'Select any project to continue!'
+      }
+      return 'Welcome back to the workspace!'
+    },
     simpleProjectName(name){
       let nameSliced = name.split(" ").map(word => word.slice(0,1));
       let simplifiedName = nameSliced.reduce( function(a,b){
@@ -262,6 +288,8 @@ export default {
       });
     },
 
+
+
     projectDelete(id){
 
       fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/proyectos/' + id,{
@@ -305,6 +333,20 @@ export default {
           console.log(this.taskListData);
           this.taskListData.map(task => task.id == id ? task.status = 'completed': 'waiting');
           console.log(this.taskListData);
+        }
+      });
+    },
+
+    taskSetUncompleted(id){
+      fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/tasks/' + id,{
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      body: JSON.stringify({status:'waiting'})
+      }).then(res => {
+        if(res.status == 200){
+          this.taskListData.map(task => task.id == id ? task.status = 'waiting': 'completed');
         }
       });
     },
@@ -641,6 +683,9 @@ export default {
   margin:0.5rem;
   user-select: none;
 }
+
+.todo-tasks.active{
+}
 .todo-tasks-title{
 }
 .todo-tasks-select-filter{
@@ -704,6 +749,9 @@ export default {
   cursor: pointer;
 }
 
+.todo-tasks-list-card svg.active{
+  color:var(--color-green);
+}
 
 .todo-tasks-list-card-delete svg{
   height:1.5rem;
