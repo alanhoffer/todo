@@ -269,6 +269,7 @@ export default {
 
     setProjectId(id){
       this.taskAddData.projectid = id;
+      this.statusFilter = 'all';
       this.projectSelected = id;
     },
     toggleAddProjectActive(){
