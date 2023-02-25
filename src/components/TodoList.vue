@@ -112,10 +112,10 @@
       </svg>
 
     </div>
-    <div @click.stop v-show="this.addProjectActive" class="todo-add-projectinput">
+    <div @click.stop v-show="this.addProjectActive" class="todo-add-projectinput" >
       <h3> NEW PROJECT </h3>
       <div class="todo-add-projectinput-container">
-      <input v-model="this.projectAddData.name" placeholder="Escribe un nombre de proyecto" />
+      <input v-model="this.projectAddData.name" placeholder="Escribe un nombre de proyecto" maxlength="18" minlength="4" ref="projectInputRef" />
       <span class="add-project" @click="addProject">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-6 h-6">
           <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -181,7 +181,12 @@ export default {
             })
   },
   methods:{
-    
+    focusProjectInput() {
+      setTimeout(() => {
+        
+        this.$refs.projectInputRef.focus()
+      }, 500);
+    }, 
     searchFilter(){
       if(this.statusFilter == 'all'){
         return this.taskListData.filter( task => task.title.toLowerCase().startsWith(this.searchText.toLowerCase()) && task.status != 'completed');
@@ -230,7 +235,6 @@ export default {
     },
     emptyCheck(){
       let result;
-      
       if(this.projectsListData.length < 1){
         console.log(this.projectsListData.length)
         this.emptyMessage = 'No hay ningun proyecto';
@@ -240,8 +244,7 @@ export default {
         if(this.statusFilter == 'all'){
           result = this.taskListData.filter(task => task.status != 'completed');
           this.emptyMessage = 'No hay ninguna tarea';
-          console.log(result.length < 1 ?  true : false)
-          return result.length < 1 ?  true : false
+          return result.length < 1 ?  false : true
         }
         if(this.statusFilter == 'completed'){
           result = this.taskListData.filter(task => task.status == 'completed');
@@ -275,6 +278,7 @@ export default {
     toggleAddProjectActive(){
       this.projectAddData.name = '';
       this.addProjectActive = !this.addProjectActive;
+      this.focusProjectInput();
     },
     taskDelete(id){
       fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/tasks/' + id,{
@@ -357,7 +361,7 @@ export default {
         return this.showError('Select any project to continue')
       }
 
-      if(this.taskAddData.title.length <= 6){
+      if(this.taskAddData.title.length <= 4){
         return this.showError('Title is to short')
       }
 
@@ -386,8 +390,15 @@ export default {
     },
     addProject() {
 
-      if(this.projectAddData.name.length >= 4){
-        fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/proyectos',{
+      if(this.projectAddData.name.length <= 4){
+        return this.showError('Project name is to short')
+      }
+
+      if(this.projectAddData.name.length >= 18){
+        return this.showError('Project name is to short')
+      }
+
+      fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/proyectos',{
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -403,12 +414,7 @@ export default {
           this.toggleAddProjectActive();
           this.showError('Project added successfully')
         });
-      }
-      else{
-        this.showError(
-          'ERROR:  Project name is to short or to much projects'
-        )
-      }
+      
     }
   },
 }
