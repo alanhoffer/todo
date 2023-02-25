@@ -244,7 +244,7 @@ export default {
         if(this.statusFilter == 'all'){
           result = this.taskListData.filter(task => task.status != 'completed');
           this.emptyMessage = 'No hay ninguna tarea';
-          return result.length < 1 ?  false : true
+          return result.length < 1 ?  true : false
         }
         if(this.statusFilter == 'completed'){
           result = this.taskListData.filter(task => task.status == 'completed');
