@@ -395,7 +395,7 @@ export default {
       }
 
       if(this.projectAddData.name.length >= 18){
-        return this.showError('Project name is to short')
+        return this.showError('Project name is to long')
       }
 
       fetch('https://63530f39d0bca53a8eb9fa65.mockapi.io/proyectos',{
